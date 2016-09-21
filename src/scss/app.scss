@@ -1,17 +1,2 @@
-@import "settings";
-@import "mixins";
-@import "typography";
-@import "components";
 
-*, *::before, *::after {
-  box-sizing: inherit;
-}
-
-:root {
-  background: white;
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-}
+@import "../../node_modules/bulma/bulma";
