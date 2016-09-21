@@ -13,6 +13,7 @@ article {
 
 .mask {
   background-color: yellow;
+  // opacity: .3;
   cursor: grab;
   span {
     cursor: grab !important;
@@ -33,4 +34,8 @@ article {
       // cursor: move;
     }
   }
+}
+
+.head {
+  color: red;
 }
