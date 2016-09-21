@@ -2,4 +2,4 @@
 
 const foo = 1;
 
-alert(foo);
+// alert(foo);
