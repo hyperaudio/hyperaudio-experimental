@@ -1,5 +1,16 @@
+@import "../../node_modules/bulma/bulma";
+
+html, body, main {
+  // min-height: 100vh;
+  // max-height: 100%;
+  // overflow: hidden;
+}
+
+article {
+  // height: 50%;
+  overflow: auto;
+}
+
 .mask {
   background-color: yellow;
 }
-
-@import "../../node_modules/bulma/bulma";
