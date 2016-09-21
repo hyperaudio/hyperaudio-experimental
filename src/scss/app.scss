@@ -13,4 +13,24 @@ article {
 
 .mask {
   background-color: yellow;
+  cursor: grab;
+  span {
+    cursor: grab !important;
+  }
+}
+
+#player {
+  article {
+    span {
+      cursor: pointer;
+    }
+  }
+}
+
+#remixer {
+  article {
+    section {
+      // cursor: move;
+    }
+  }
 }

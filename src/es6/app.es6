@@ -8,10 +8,10 @@ const d = debug('ha');
 rangy.init();
 
 const $player = $('#player');
+let tether;
 
 $player.find('article').mouseup(() => {
   const selection = rangy.getSelection();
-  d(selection.toHtml());
 
   const range = rangy.createRange();
   let anchor = selection.anchorNode.parentNode;
@@ -25,42 +25,46 @@ $player.find('article').mouseup(() => {
     range.setEndAfter(selection.focusNode.parentNode.parentNode);
   }
   selection.setSingleRange(range);
-  d(selection.toHtml());
 
   if (range.canSurroundContents()) {
-    d(selection.anchorNode);
-
     const mask = $('<div class="mask" draggable="true"></div>').html(selection.toHtml());
-    mask.width($(anchor).width());
-    // mask.height($(anchor).height());
+    if (anchor.nodeName === 'P') mask.width($(anchor).width());
+
+    mask.data('html', selection.toHtml());
     mask.appendTo($player.find('article section'));
     mask.on('dragstart', (e) => {
-      d(e);
-      e.originalEvent.dataTransfer.setData('html', selection.toHtml());
+      e.originalEvent.dataTransfer.setData('html', mask.data('html'));
       e.originalEvent.dataTransfer.effectAllowed = 'copy';
     });
 
-    new Tether({
+    if (tether) tether.destroy();
+    $('.tether-element').remove();
+
+    tether = new Tether({
       element: mask,
       target: anchor,
       attachment: 'top left',
       targetAttachment: 'top left',
     });
+
+    selection.removeAllRanges();
   }
 });
 
 
 const $remixer = $('#remixer');
 
-$remixer.find('article')
-.on('dragover', (e) => {
+$remixer.find('article').on('dragover', (e) => {
   e.preventDefault();
-})
-.on('drop', (e) => {
+}).on('drop', (e) => {
   e.preventDefault();
+
   const html = e.originalEvent.dataTransfer.getData('html');
-  d(html);
-  $(e.target).append(html);
+  const section = $('<section></section>');
+  section.html(html);
+
+  // $(e.target).append(section);
+  $remixer.find('article').append(section);
 });
 
 
