@@ -17,14 +17,17 @@ $player.find('article').mouseup(() => {
   let anchor = selection.anchorNode.parentNode;
   // let anchor = selection.anchorNode.parentNode.parentNode;
 
-  if (selection.anchorNode.parentNode.parentNode === selection.focusNode.parentNode.parentNode) {
-    range.setStartBefore(selection.anchorNode.parentNode);
-    range.setEndAfter(selection.focusNode.parentNode);
-  } else {
-    anchor = selection.anchorNode.parentNode.parentNode;
-    range.setStartBefore(selection.anchorNode.parentNode.parentNode);
-    range.setEndAfter(selection.focusNode.parentNode.parentNode);
+  let start = selection.anchorNode.parentNode;
+  let end = selection.focusNode.parentNode;
+
+  if (start.parentNode !== end.parentNode) {
+    anchor = anchor.parentNode;
+    start = start.parentNode;
+    end = end.parentNode;
   }
+
+  range.setStartBefore(start);
+  range.setEndAfter(end);
   selection.setSingleRange(range);
 
   if (range.canSurroundContents()) {
@@ -37,7 +40,10 @@ $player.find('article').mouseup(() => {
       mask.data('html', selection.toHtml());
       // d(selection.toHtml());
     } else {
+      mask.css('max-width', $(anchor).parent().width());
       mask.data('html', `<p>${selection.toHtml()}</p>`);
+      // d(start);
+      // d(end);
       // d($(anchor.parentNode).clone().empty().append(selection.toHtml()).html());
     }
 
@@ -56,6 +62,7 @@ $player.find('article').mouseup(() => {
       target: anchor,
       attachment: 'top left',
       targetAttachment: 'top left',
+      targetOffset: '1px 0',
     });
 
     selection.removeAllRanges();
@@ -67,13 +74,15 @@ $player.find('article').mouseup(() => {
   }
 });
 
-$player.find('video').on('timeupdate', (e) => {
+$player.find('video').on('timeupdate', () => {
   const time = $player.find('video')[0].currentTime * 1000;
   const words = $player.find('article span');
   for (let i = 0; i < words.length; i++) {
     if ($(words[i]).data('m') > time) {
-      $(words[i]).addClass('head');
+      $(words[i]).addClass('head').parent().addClass('active');
       $player.find('article span.head').not(words[i]).removeClass('head');
+      $player.find('article p.active').not($(words[i]).parent()).removeClass('active');
+      // words[i].scrollIntoView({ block: "end", behavior: "smooth" });
       break;
     }
   }
@@ -85,6 +94,9 @@ $remixer.find('article').on('dragover', (e) => {
   e.preventDefault();
 }).on('drop', (e) => {
   e.preventDefault();
+
+  if (tether) tether.destroy();
+  $('.tether-element').remove();
 
   const html = e.originalEvent.dataTransfer.getData('html');
   const src = e.originalEvent.dataTransfer.getData('src');
@@ -100,12 +112,12 @@ $remixer.find('article').on('dragover', (e) => {
       break;
     }
   }
+
   if (!found) {
-    const video = $('<video type="audio/mp4" controls></video>').attr('src', src);
+    const video = $('<video width="640" height="360" type="audio/mp4" controls preload></video>').attr('src', src);
     $remixer.find('>header').append(video);
   }
 
-  // $(e.target).append(section);
   $remixer.find('article').append(section);
 }).click((e) => {
   const m = $(e.target).data('m');
@@ -120,7 +132,6 @@ $remixer.find('article').on('dragover', (e) => {
     }
   }
 });
-
 
 // debug
 window.debug = debug;
