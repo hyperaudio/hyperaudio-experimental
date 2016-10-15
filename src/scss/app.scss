@@ -108,6 +108,10 @@ article span {
   font-weight: bold;
 }
 
+section.active ~ section p span {
+  font-weight: normal;
+}
+
 p.active ~ p span {
   font-weight: normal;
 }

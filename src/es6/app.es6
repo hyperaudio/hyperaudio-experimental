@@ -5,12 +5,69 @@ import Tether from 'tether';
 
 const d = debug('ha');
 
-rangy.init();
+// PLAYER
 
-const $player = $('#player');
+const hookVideos = ($player) => {
+  $player.find('video').each((v, video) => {
+    const $video = $(video);
+
+    if (! $video.hasClass('hyperaudio-enabled')) {
+      $video.on('timeupdate', () => {
+        const time = video.currentTime * 1000;
+        const words = $player.find(`article > section[data-src="${$video.attr('src')}"] span`);
+        for (let i = 0; i < words.length; i++) {
+          if ($(words[i]).data('m') > time) {
+            $(words[i]).addClass('head').parent().addClass('active').parent().addClass('active');
+            $player.find('article span.head').not(words[i]).removeClass('head');
+            $player.find('article p.active').not($(words[i]).parent()).removeClass('active');
+            $player.find('article section.active').not($(words[i]).parent().parent()).removeClass('active');
+            // words[i].scrollIntoView({ block: 'end', behavior: 'smooth' });
+            break;
+          }
+        }
+      });
+
+      $video.addClass('hyperaudio-enabled');
+    }
+  });
+};
+
+$('.hyperaudio-player').each((p, player) => {
+  const $player = $(player);
+
+  $player.click((e) => {
+    const m = $(e.target).data('m');
+    if (!isNaN(m)) {
+      const src = $(e.target).closest('section').data('src');
+      let videoElements = $player.find('.hyperaudio-media video');
+      if (videoElements.length === 0) videoElements = $player.find('video');
+      if (videoElements.length === 0) {
+        // create video element
+      } else {
+        for (const video of videoElements) {
+          if ($(video).attr('src') === src) {
+            video.currentTime = m / 1000;
+            break;
+          }
+        }
+      }
+    }
+
+    hookVideos($player);
+  });
+
+  hookVideos($player);
+});
+
+
+// PAD
+
+if (!rangy.initialized) rangy.init();
+
+const $source = $('#player');
 let tether;
 
-$player.find('article').mouseup(() => {
+$source.find('article').mouseup(() => {
   const selection = rangy.getSelection();
 
   const range = rangy.createRange();
@@ -33,24 +90,30 @@ $player.find('article').mouseup(() => {
   if (range.canSurroundContents()) {
     const mask = $('<div class="mask" draggable="true"></div>').html(selection.toHtml());
     // const mask = $('<div class="mask" draggable="true"></div>').append($(anchor).clone());
+    mask.find('.head').removeClass('head');
+    mask.find('.active').removeClass('active');
+    mask.find('[class]').removeAttr('class');
+
+    const html = mask.html(); // selection.toHtml()
+    // d(html);
 
     d(anchor.nodeName);
     if (anchor.nodeName === 'P') {
       mask.width($(anchor).width());
-      mask.data('html', selection.toHtml());
+      mask.data('html', html);
       // d(selection.toHtml());
     } else {
       mask.css('max-width', $(anchor).parent().width());
-      mask.data('html', `<p>${selection.toHtml()}</p>`);
+      mask.data('html', `<p>${html}</p>`);
       // d(start);
       // d(end);
       // d($(anchor.parentNode).clone().empty().append(selection.toHtml()).html());
     }
 
-    mask.appendTo($player.find('article section'));
+    mask.appendTo($source.find('article section'));
     mask.on('dragstart', (e) => {
       e.originalEvent.dataTransfer.setData('html', mask.data('html'));
-      e.originalEvent.dataTransfer.setData('src', $player.find('article section').data('src'));
+      e.originalEvent.dataTransfer.setData('src', $source.find('article section').data('src'));
       e.originalEvent.dataTransfer.effectAllowed = 'copy';
     });
 
@@ -67,26 +130,8 @@ $player.find('article').mouseup(() => {
 
     selection.removeAllRanges();
   }
-}).click((e) => {
-  const m = $(e.target).data('m');
-  if (!isNaN(m)) {
-    $player.find('video')[0].currentTime = m / 1000;
-  }
 });
 
-$player.find('video').on('timeupdate', () => {
-  const time = $player.find('video')[0].currentTime * 1000;
-  const words = $player.find('article span');
-  for (let i = 0; i < words.length; i++) {
-    if ($(words[i]).data('m') > time) {
-      $(words[i]).addClass('head').parent().addClass('active');
-      $player.find('article span.head').not(words[i]).removeClass('head');
-      $player.find('article p.active').not($(words[i]).parent()).removeClass('active');
-      // words[i].scrollIntoView({ block: "end", behavior: "smooth" });
-      break;
-    }
-  }
-});
 
 const $remixer = $('#remixer');
 
@@ -119,19 +164,8 @@ $remixer.find('article').on('dragover', (e) => {
   }
 
   $remixer.find('article').append(section);
-}).click((e) => {
-  const m = $(e.target).data('m');
-  if (!isNaN(m)) {
-    const src = $(e.target).closest('section').data('src');
-    const videoElements = $remixer.find('>header video');
-    for (const video of videoElements) {
-      if ($(video).attr('src') === src) {
-        video.currentTime = m / 1000;
-        break;
-      }
-    }
-  }
 });
+
 
 // modals
 
