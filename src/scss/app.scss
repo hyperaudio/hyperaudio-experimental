@@ -3,6 +3,8 @@
 
 // FIXME
 @import "../../node_modules/tether-tooltip/dist/css/tooltip-theme-arrows";
+@import "../../node_modules/tether-drop/dist/css/drop-theme-arrows-bounce-dark";
+@import "../../node_modules/tether-shepherd/dist/css/shepherd-theme-square-dark";
 .tooltip-content {
   background-color: red !important;
 }
@@ -19,31 +21,6 @@ main, main > section {
   height: 100%;
 }
 
-header {
-  position: relative;
-  width: 640px;
-  height: 360px;
-  background: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1IiBoZWlnaHQ9IjUiPgo8cmVjdCB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSJ0cmFuc3BhcmVudCI+PC9yZWN0Pgo8cmVjdCB3aWR0aD0iMSIgaGVpZ2h0PSIxIiBmaWxsPSIjY2NjIj48L3JlY3Q+Cjwvc3ZnPg==");
-
-  a {
-    display: block;
-    z-index: 1000;
-    position: absolute;
-    top: 0;
-    left: 0;
-    color: red;
-
-    :hover {
-      color: black;
-      background-color: red;
-    }
-
-    span {
-      border-radius: 2px;
-      // padding-right: 1px;
-    }
-  }
-}
 
 ::-moz-selection {
   color: black;
@@ -55,7 +32,35 @@ header {
   background: black;
 }
 
-#player section {
+.hyperaudio-player {
+  header {
+    position: relative;
+    width: 640px;
+    height: 360px;
+    background: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1IiBoZWlnaHQ9IjUiPgo8cmVjdCB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSJ0cmFuc3BhcmVudCI+PC9yZWN0Pgo8cmVjdCB3aWR0aD0iMSIgaGVpZ2h0PSIxIiBmaWxsPSIjY2NjIj48L3JlY3Q+Cjwvc3ZnPg==");
+
+    a {
+      display: block;
+      z-index: 1000;
+      position: absolute;
+      top: 0;
+      left: 0;
+      color: red;
+
+      :hover {
+        color: black;
+        background-color: red;
+      }
+
+      span {
+        border-radius: 2px;
+        // padding-right: 1px;
+      }
+    }
+  }
+}
+
+.hyperaudio-source section {
   ::-moz-selection {
     color: yellow;
     background: black;
@@ -66,7 +71,8 @@ header {
     background: black;
   }
 }
-#remixer header > a {
+
+.hyperaudio-sink header > a {
   left: auto;
   right: 0;
   span {
@@ -111,7 +117,7 @@ article {
   }
 }
 
-#player {
+.hyperaudio-player {
   article {
     span {
       cursor: pointer;
@@ -119,7 +125,7 @@ article {
   }
 }
 
-#remixer {
+.hyperaudio-sink {
   article {
     section {
       // cursor: move;

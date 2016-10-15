@@ -3,6 +3,8 @@ import $ from 'jquery';
 import rangy from 'rangy';
 import Tether from 'tether';
 import Tooltip from 'tether-tooltip';
+import Drop from 'tether-drop';
+// import Shepherd from 'tether-shepherd';
 
 const d = debug('ha');
 
@@ -216,6 +218,15 @@ $('.hyperaudio-sink').each((s, sink) => {
   });
 });
 
+// drop
+
+new Drop({
+  target: document.querySelector('video'),
+  content: 'TODO: video metadata',
+  classes: 'drop-theme-arrows-bounce-dark',
+  position: 'bottom center',
+  openOn: 'click',
+});
 
 // modals
 
@@ -248,6 +259,23 @@ $('#export').click(() => {
 $('#exporter .modal-close').click(() => {
   $('#exporter').removeClass('is-active');
 });
+
+// tour
+
+// const tour = new Shepherd.Tour({
+//   defaults: {
+//     classes: 'shepherd-theme-square-dark',
+//   },
+// });
+//
+// tour.addStep('example', {
+//   title: 'Example Shepherd',
+//   text: 'Creating a Shepherd is easy too! Just create ...',
+//   attachTo: '#browse',
+//   advanceOn: '.docs-link click',
+// });
+
+// tour.start();
 
 // debug
 window.debug = debug;
