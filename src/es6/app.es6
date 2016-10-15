@@ -153,6 +153,7 @@ $('.hyperaudio-source').each((s, source) => {
         e.originalEvent.dataTransfer.setData('html', mask.data('html'));
         e.originalEvent.dataTransfer.setData('src', $source.find('article section').data('src'));
         e.originalEvent.dataTransfer.effectAllowed = 'copy';
+        e.originalEvent.dataTransfer.dropEffect = 'copy';
       });
 
       mask.mouseup(() => {
@@ -184,14 +185,28 @@ $('.hyperaudio-sink').each((s, sink) => {
     e.preventDefault();
   }).on('drop', (e) => {
     e.preventDefault();
+    $sink.find('section.over').removeClass('over');
 
     if (tether) tether.destroy();
     $('.tether-element').remove();
 
     const html = e.originalEvent.dataTransfer.getData('html');
     const src = e.originalEvent.dataTransfer.getData('src');
-    const section = $(`<section data-src=${src}></section>`);
+    if (!src || !html) return;
+
+    const section = $(`<section draggable="true" data-src=${src}></section>`);
     section.html(html);
+
+    section.on('dragstart', (e) => {
+      e.originalEvent.dataTransfer.setData('html', html);
+      e.originalEvent.dataTransfer.setData('src', src);
+      e.originalEvent.dataTransfer.effectAllowed = 'move';
+      e.originalEvent.dataTransfer.dropEffect = 'move';
+    }).on('dragenter', (e) => {
+      section.addClass('over');
+    }).on('dragleave', (e) => {
+      section.removeClass('over');
+    });
 
     // TODO look for [src=""]?
     const videoElements = $sink.find('>header video');
