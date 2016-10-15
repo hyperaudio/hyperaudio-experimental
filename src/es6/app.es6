@@ -133,6 +133,24 @@ $remixer.find('article').on('dragover', (e) => {
   }
 });
 
+// modals
+
+$('#browse').click(() => {
+  $('#browser').addClass('is-active');
+});
+
+$('#browser .modal-close').click(() => {
+  $('#browser').removeClass('is-active');
+});
+
+$('#export').click(() => {
+  $('#exporter').addClass('is-active');
+});
+
+$('#exporter .modal-close').click(() => {
+  $('#exporter').removeClass('is-active');
+});
+
 // debug
 window.debug = debug;
 window.$ = $;

@@ -14,9 +14,53 @@ main, main > section {
 }
 
 header {
+  position: relative;
   width: 640px;
   height: 360px;
   background: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1IiBoZWlnaHQ9IjUiPgo8cmVjdCB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSJ0cmFuc3BhcmVudCI+PC9yZWN0Pgo8cmVjdCB3aWR0aD0iMSIgaGVpZ2h0PSIxIiBmaWxsPSIjY2NjIj48L3JlY3Q+Cjwvc3ZnPg==");
+
+  a {
+    display: block;
+    z-index: 1000;
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: red;
+
+    :hover {
+      color: black;
+      background-color: red;
+    }
+
+    span {
+      border-radius: 2px;
+      // padding-right: 1px;
+    }
+  }
+}
+
+#remixer header > a {
+  left: auto;
+  right: 0;
+  span {
+    border-radius: 3px;
+  }
+}
+
+.modal-close {
+  background-color: black;
+
+  &:hover {
+    background-color: red;
+
+    &:before, &:after {
+      background-color: black;
+    }
+  }
+
+  &:before, &:after {
+    background-color: red;
+  }
 }
 
 video {
