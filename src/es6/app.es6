@@ -103,143 +103,117 @@ $('.hyperaudio-player').each((p, player) => {
 // PAD
 
 if (!rangy.initialized) rangy.init();
-
-const $source = $('#player');
 let tether;
-// let mouseDown = false;
 
-$source.find('article').mouseup(() => {
-  // mouseDown = false;
+$('.hyperaudio-source').each((s, source) => {
+  const $source = $(source);
 
-  const selection = rangy.getSelection();
+  $source.find('article').mouseup(() => {
+    const selection = rangy.getSelection();
 
-  const range = rangy.createRange();
-  let anchor = selection.anchorNode.parentNode;
+    const range = rangy.createRange();
+    let anchor = selection.anchorNode.parentNode;
 
-  let start = selection.anchorNode.parentNode;
-  let end = selection.focusNode.parentNode;
+    let start = selection.anchorNode.parentNode;
+    let end = selection.focusNode.parentNode;
 
-  if (start.parentNode !== end.parentNode) {
-    anchor = anchor.parentNode;
-    start = start.parentNode;
-    end = end.parentNode;
-  }
-
-  range.setStartBefore(start);
-  range.setEndAfter(end);
-  selection.setSingleRange(range);
-
-  if (range.canSurroundContents()) {
-    const mask = $('<div class="mask" draggable="true"></div>').html(selection.toHtml());
-    // const mask = $('<div class="mask" draggable="true"></div>').append($(anchor).clone());
-    mask.find('.head').removeClass('head');
-    mask.find('.active').removeClass('active');
-    mask.find('[class]').removeAttr('class');
-
-    const html = mask.html(); // selection.toHtml()
-    // d(html);
-
-    d(anchor.nodeName);
-    if (anchor.nodeName === 'P') {
-      mask.width($(anchor).width());
-      mask.data('html', html);
-    } else {
-      mask.css('max-width', $(anchor).parent().width());
-      mask.data('html', `<p>${html}</p>`);
+    if (start.parentNode !== end.parentNode) {
+      anchor = anchor.parentNode;
+      start = start.parentNode;
+      end = end.parentNode;
     }
 
-    mask.appendTo($source.find('article section'));
-    mask.on('dragstart', (e) => {
-      e.originalEvent.dataTransfer.setData('html', mask.data('html'));
-      e.originalEvent.dataTransfer.setData('src', $source.find('article section').data('src'));
-      e.originalEvent.dataTransfer.effectAllowed = 'copy';
-    });
+    range.setStartBefore(start);
+    range.setEndAfter(end);
+    selection.setSingleRange(range);
 
-    mask.mouseup(() => {
+    if (range.canSurroundContents()) {
+      const mask = $('<div class="mask" draggable="true"></div>').html(selection.toHtml());
+      // const mask = $('<div class="mask" draggable="true"></div>').append($(anchor).clone());
+      mask.find('.head').removeClass('head');
+      mask.find('.active').removeClass('active');
+      mask.find('[class]').removeAttr('class');
+
+      const html = mask.html(); // selection.toHtml()
+      // d(html);
+
+      d(anchor.nodeName);
+      if (anchor.nodeName === 'P') {
+        mask.width($(anchor).width());
+        mask.data('html', html);
+      } else {
+        mask.css('max-width', $(anchor).parent().width());
+        mask.data('html', `<p>${html}</p>`);
+      }
+
+      mask.appendTo($source.find('article section'));
+      mask.on('dragstart', (e) => {
+        e.originalEvent.dataTransfer.setData('html', mask.data('html'));
+        e.originalEvent.dataTransfer.setData('src', $source.find('article section').data('src'));
+        e.originalEvent.dataTransfer.effectAllowed = 'copy';
+      });
+
+      mask.mouseup(() => {
+        if (tether) tether.destroy();
+        $('.tether-element').remove();
+      });
+
       if (tether) tether.destroy();
       $('.tether-element').remove();
-    });
+
+      tether = new Tether({
+        element: mask,
+        target: anchor,
+        attachment: 'top left',
+        targetAttachment: 'top left',
+        targetOffset: '1px 0',
+      });
+    }
+
+    selection.removeAllRanges();
+  });
+});
+
+
+$('.hyperaudio-sink').each((s, sink) => {
+  const $sink = $(sink);
+
+  $sink.find('article').on('dragover', (e) => {
+    e.preventDefault();
+  }).on('drop', (e) => {
+    e.preventDefault();
 
     if (tether) tether.destroy();
     $('.tether-element').remove();
 
-    tether = new Tether({
-      element: mask,
-      target: anchor,
-      attachment: 'top left',
-      targetAttachment: 'top left',
-      targetOffset: '1px 0',
-    });
-  }
+    const html = e.originalEvent.dataTransfer.getData('html');
+    const src = e.originalEvent.dataTransfer.getData('src');
+    const section = $(`<section data-src=${src}></section>`);
+    section.html(html);
 
-  selection.removeAllRanges();
-});
-
-// $source.find('article').mousemove(() => {
-//   if (!mouseDown) return;
-//
-//   const selection = rangy.getSelection();
-//
-//   const range = rangy.createRange();
-//   let anchor = selection.anchorNode.parentNode;
-//
-//   let start = selection.anchorNode.parentNode;
-//   let end = selection.focusNode.parentNode;
-//
-//   if (start.parentNode !== end.parentNode) {
-//     anchor = anchor.parentNode;
-//     start = start.parentNode;
-//     end = end.parentNode;
-//   }
-//
-//   range.setStartBefore(start);
-//   range.setEndAfter(end);
-//   selection.setSingleRange(range);
-//
-//   if (range.canSurroundContents()) {
-//     $source.addClass('hyperaudio-selection');
-//   } else {
-//     $source.removeClass('hyperaudio-selection');
-//   }
-// });
-
-const $remixer = $('#remixer');
-
-$remixer.find('article').on('dragover', (e) => {
-  e.preventDefault();
-}).on('drop', (e) => {
-  e.preventDefault();
-
-  if (tether) tether.destroy();
-  $('.tether-element').remove();
-
-  const html = e.originalEvent.dataTransfer.getData('html');
-  const src = e.originalEvent.dataTransfer.getData('src');
-  const section = $(`<section data-src=${src}></section>`);
-  section.html(html);
-
-  // TODO look for [src=""]?
-  const videoElements = $remixer.find('>header video');
-  let found = false;
-  for (const video of videoElements) {
-    if ($(video).attr('src') === src) {
-      found = true;
-      break;
+    // TODO look for [src=""]?
+    const videoElements = $sink.find('>header video');
+    let found = false;
+    for (const video of videoElements) {
+      if ($(video).attr('src') === src) {
+        found = true;
+        break;
+      }
     }
-  }
 
-  // TODO consolidate video creation
-  if (!found) {
-    const video = $(`<video
-      width="640" height="360"
-      type="audio/mp4"
-      src="${src}"
-      controls preload></video>`);
+    // TODO consolidate video creation
+    if (!found) {
+      const video = $(`<video
+        width="640" height="360"
+        type="audio/mp4"
+        src="${src}"
+        controls preload></video>`);
 
-    $remixer.find('>header').append(video);
-  }
+      $sink.find('>header').append(video);
+    }
 
-  $remixer.find('article').append(section);
+    $sink.find('article').append(section);
+  });
 });
 
 
