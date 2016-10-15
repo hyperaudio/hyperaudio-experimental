@@ -96,6 +96,11 @@ article {
   article {
     section {
       // cursor: move;
+      border-left: 1px solid blue;
+
+      &.active {
+        border-left: 1px solid red;
+      }
     }
   }
 }
@@ -108,19 +113,30 @@ article span {
   font-weight: bold;
 }
 
+.active {
+  // text-decoration: underline;
+}
+
 section.active ~ section p span {
   font-weight: normal;
 }
 
-p.active ~ p span {
+section.active p.active ~ p span {
   font-weight: normal;
 }
 
 .head {
-  color: red;
-  font-weight: bold;
+  color: blue;
 }
 
-.head ~ span {
+section.active p.active .head {
+  color: red;
+}
+
+section.active p.active .head ~ span {
   font-weight: normal;
+}
+
+.high {
+  outline: 1px solid red;
 }

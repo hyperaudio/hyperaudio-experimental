@@ -7,6 +7,45 @@ const d = debug('ha');
 
 // PLAYER
 
+const setHead = ($player, $video, time) => {
+  $player.find(`article > section[data-src="${$video.attr('src')}"]`).each((s, section) => {
+    const $section = $(section);
+    const words = $section.find('> p > span');
+
+    const start = $(words[0]).data('m');
+    const end = $(words[words.length - 1]).data('m');
+
+    if (time < start || time > end) {
+      $section.find('p.active').removeClass('active');
+      return;
+    }
+
+    for (let i = 0; i < words.length; i++) {
+      const word = words[i];
+      const $word = $(word);
+
+      if ($word.data('m') > time) {
+        if ($word.hasClass('head')) break;
+
+        // debug:
+        $word.addClass('high');
+        setTimeout(() => { $word.removeClass('high'); }, 200);
+
+        $word.addClass('head').parent().addClass('active');
+        $player.find('article span.head').not(word).each((h, head) => {
+          if ($(head).data('m') !== $word.data('m')) $(head).removeClass('head');
+        });
+
+        $section.find('p.active').not($word.parent()).removeClass('active');
+
+        // TODO scroll if available and only in active section
+        // words[i].scrollIntoView({ block: 'end', behavior: 'smooth' });
+        break;
+      }
+    }
+  });
+};
+
 const hookVideos = ($player) => {
   $player.find('video').each((v, video) => {
     const $video = $(video);
@@ -14,20 +53,8 @@ const hookVideos = ($player) => {
     if (! $video.hasClass('hyperaudio-enabled')) {
       $video.on('timeupdate', () => {
         const time = video.currentTime * 1000;
-        const words = $player.find(`article > section[data-src="${$video.attr('src')}"] span`);
-        for (let i = 0; i < words.length; i++) {
-          if ($(words[i]).data('m') > time) {
-            $(words[i]).addClass('head').parent().addClass('active').parent().addClass('active');
-            $player.find('article span.head').not(words[i]).removeClass('head');
-            $player.find('article p.active').not($(words[i]).parent()).removeClass('active');
-            $player.find('article section.active').not($(words[i]).parent().parent()).removeClass('active');
-            // words[i].scrollIntoView({ block: 'end', behavior: 'smooth' });
-            break;
-          }
-        }
-      });
-
-      $video.addClass('hyperaudio-enabled');
+        setHead($player, $video, time);
+      }).addClass('hyperaudio-enabled');
     }
   });
 };
@@ -38,7 +65,11 @@ $('.hyperaudio-player').each((p, player) => {
   $player.click((e) => {
     const m = $(e.target).data('m');
     if (!isNaN(m)) {
-      const src = $(e.target).closest('section').data('src');
+      const $section = $(e.target).closest('section').addClass('active');
+      $player.find('article section.active').not($section).removeClass('active');
+
+      const src = $section.data('src');
+
       let videoElements = $player.find('.hyperaudio-media video');
       if (videoElements.length === 0) videoElements = $player.find('video');
       if (videoElements.length === 0) {
@@ -72,7 +103,6 @@ $source.find('article').mouseup(() => {
 
   const range = rangy.createRange();
   let anchor = selection.anchorNode.parentNode;
-  // let anchor = selection.anchorNode.parentNode.parentNode;
 
   let start = selection.anchorNode.parentNode;
   let end = selection.focusNode.parentNode;
@@ -101,13 +131,9 @@ $source.find('article').mouseup(() => {
     if (anchor.nodeName === 'P') {
       mask.width($(anchor).width());
       mask.data('html', html);
-      // d(selection.toHtml());
     } else {
       mask.css('max-width', $(anchor).parent().width());
       mask.data('html', `<p>${html}</p>`);
-      // d(start);
-      // d(end);
-      // d($(anchor.parentNode).clone().empty().append(selection.toHtml()).html());
     }
 
     mask.appendTo($source.find('article section'));
@@ -127,9 +153,9 @@ $source.find('article').mouseup(() => {
       targetAttachment: 'top left',
       targetOffset: '1px 0',
     });
-
-    selection.removeAllRanges();
   }
+
+  selection.removeAllRanges();
 });
 
 
