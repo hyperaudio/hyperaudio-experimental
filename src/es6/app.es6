@@ -155,6 +155,11 @@ $source.find('article').mouseup(() => {
       e.originalEvent.dataTransfer.effectAllowed = 'copy';
     });
 
+    mask.mouseup(() => {
+      if (tether) tether.destroy();
+      $('.tether-element').remove();
+    });
+
     if (tether) tether.destroy();
     $('.tether-element').remove();
 
