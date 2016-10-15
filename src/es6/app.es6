@@ -2,6 +2,7 @@ import debug from 'debug';
 import $ from 'jquery';
 import rangy from 'rangy';
 import Tether from 'tether';
+import Tooltip from 'tether-tooltip';
 
 const d = debug('ha');
 
@@ -73,7 +74,15 @@ $('.hyperaudio-player').each((p, player) => {
       let videoElements = $player.find('.hyperaudio-media video');
       if (videoElements.length === 0) videoElements = $player.find('video');
       if (videoElements.length === 0) {
-        // create video element
+        // TODO consolidate video creation
+        const video = $(`<video
+          width="640" height="360"
+          type="audio/mp4"
+          src="${src}"
+          controls preload></video>`);
+
+        $player.find('.hyperaudio-media').append(video);
+        videoElements = [video];
       } else {
         for (const video of videoElements) {
           if ($(video).attr('src') === src) {
@@ -97,8 +106,11 @@ if (!rangy.initialized) rangy.init();
 
 const $source = $('#player');
 let tether;
+// let mouseDown = false;
 
 $source.find('article').mouseup(() => {
+  // mouseDown = false;
+
   const selection = rangy.getSelection();
 
   const range = rangy.createRange();
@@ -158,6 +170,33 @@ $source.find('article').mouseup(() => {
   selection.removeAllRanges();
 });
 
+// $source.find('article').mousemove(() => {
+//   if (!mouseDown) return;
+//
+//   const selection = rangy.getSelection();
+//
+//   const range = rangy.createRange();
+//   let anchor = selection.anchorNode.parentNode;
+//
+//   let start = selection.anchorNode.parentNode;
+//   let end = selection.focusNode.parentNode;
+//
+//   if (start.parentNode !== end.parentNode) {
+//     anchor = anchor.parentNode;
+//     start = start.parentNode;
+//     end = end.parentNode;
+//   }
+//
+//   range.setStartBefore(start);
+//   range.setEndAfter(end);
+//   selection.setSingleRange(range);
+//
+//   if (range.canSurroundContents()) {
+//     $source.addClass('hyperaudio-selection');
+//   } else {
+//     $source.removeClass('hyperaudio-selection');
+//   }
+// });
 
 const $remixer = $('#remixer');
 
@@ -171,10 +210,10 @@ $remixer.find('article').on('dragover', (e) => {
 
   const html = e.originalEvent.dataTransfer.getData('html');
   const src = e.originalEvent.dataTransfer.getData('src');
-  const section = $('<section></section>');
-  section.attr('data-src', src);
+  const section = $(`<section data-src=${src}></section>`);
   section.html(html);
 
+  // TODO look for [src=""]?
   const videoElements = $remixer.find('>header video');
   let found = false;
   for (const video of videoElements) {
@@ -184,8 +223,14 @@ $remixer.find('article').on('dragover', (e) => {
     }
   }
 
+  // TODO consolidate video creation
   if (!found) {
-    const video = $('<video width="640" height="360" type="audio/mp4" controls preload></video>').attr('src', src);
+    const video = $(`<video
+      width="640" height="360"
+      type="audio/mp4"
+      src="${src}"
+      controls preload></video>`);
+
     $remixer.find('>header').append(video);
   }
 
@@ -194,6 +239,20 @@ $remixer.find('article').on('dragover', (e) => {
 
 
 // modals
+
+new Tooltip({
+  target: $('#browse').get(0),
+  content: 'Browse/search videos',
+  classes: 'tooltip-theme-arrows',
+  position: 'bottom left',
+});
+
+new Tooltip({
+  target: $('#export').get(0),
+  content: 'Export/share remix',
+  classes: 'tooltip-theme-arrows',
+  position: 'bottom right',
+});
 
 $('#browse').click(() => {
   $('#browser').addClass('is-active');

@@ -1,6 +1,12 @@
 @import 'https://fonts.googleapis.com/css?family=Fira+Mono';
 @import "../../node_modules/bulma/bulma";
 
+// FIXME
+@import "../../node_modules/tether-tooltip/dist/css/tooltip-theme-arrows";
+.tooltip-content {
+  background-color: red !important;
+}
+
 html, body {
   height: 100%;
   // min-height: 100vh;
@@ -39,6 +45,27 @@ header {
   }
 }
 
+::-moz-selection {
+  color: black;
+  background: black;
+}
+
+::selection {
+  color: black;
+  background: black;
+}
+
+#player section {
+  ::-moz-selection {
+    color: yellow;
+    background: black;
+  }
+
+  ::selection {
+    color: yellow;
+    background: black;
+  }
+}
 #remixer header > a {
   left: auto;
   right: 0;
