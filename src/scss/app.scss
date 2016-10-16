@@ -112,6 +112,14 @@ video {
   background-color: black;
 }
 
+// header {
+//   &:after {
+//     font-size: 8px;
+//     color: red;
+//     content: attr(data-current-time);
+//   }
+// }
+
 article {
   // height: 100%;
   height: calc(100% - 360px);
@@ -122,6 +130,13 @@ article {
   section {
     padding-left: 1em;
     padding-right: 1em;
+  }
+
+  &:before {
+    // font-size: 8px;
+    padding-left: 1em;
+    color: red;
+    content: attr(data-current-time);
   }
 }
 
@@ -150,6 +165,12 @@ article {
 
       &.active {
         border-left: 1px solid red;
+      }
+
+      &:before {
+        font-size: 8px;
+        color: red;
+        content: attr(data-start) " - " attr(data-end);
       }
     }
   }

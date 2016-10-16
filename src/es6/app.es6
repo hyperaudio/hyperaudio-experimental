@@ -113,7 +113,8 @@ const hookVideos = ($player) => {
 
     if (! $video.hasClass('hyperaudio-enabled')) {
       $video.on('timeupdate', () => {
-        const time = video.currentTime * 1000;
+        const time = Math.ceil(video.currentTime * 1000);
+        $player.find('article').attr('data-current-time', time);
         setHead($player, $video, time);
       }).addClass('hyperaudio-enabled');
     }
@@ -122,6 +123,12 @@ const hookVideos = ($player) => {
 
 $('.hyperaudio-player').each((p, player) => {
   const $player = $(player);
+
+  // add titles
+  $player.find('span[data-m]').each((s, span) => {
+    const $span = $(span);
+    $span.attr('title', `${$span.data('m')} - ${$span.data('m') + $span.data('d')}`);
+  });
 
   $player.click((e) => {
     const m = $(e.target).data('m');
@@ -220,6 +227,8 @@ $('.hyperaudio-source').each((s, source) => {
       mask.appendTo($source.find('article section'));
       mask.on('dragstart', (e) => {
         e.originalEvent.dataTransfer.setData('html', mask.data('html'));
+        e.originalEvent.dataTransfer.setData('start', $(mask.find('span').get(0)).data('m'));
+        e.originalEvent.dataTransfer.setData('end', $(mask.find('span').last().get(0)).data('m') + $(mask.find('span').last().get(0)).data('d'));
         e.originalEvent.dataTransfer.setData('src', $source.find('article section').data('src'));
         e.originalEvent.dataTransfer.effectAllowed = 'copy';
         e.originalEvent.dataTransfer.dropEffect = 'copy';
@@ -266,12 +275,17 @@ $('.hyperaudio-sink').each((s, sink) => {
     const src = e.originalEvent.dataTransfer.getData('src');
     if (!src || !html) return;
 
-    const section = $(`<section draggable="true" data-src=${src}></section>`);
+    const start = e.originalEvent.dataTransfer.getData('start');
+    const end = e.originalEvent.dataTransfer.getData('end');
+
+    const section = $(`<section draggable="true" data-src=${src} data-start=${start} data-end=${end}></section>`);
     section.html(html);
 
     section.on('dragstart', (e) => {
       e.originalEvent.dataTransfer.setData('html', html);
       e.originalEvent.dataTransfer.setData('src', src);
+      e.originalEvent.dataTransfer.setData('start', start);
+      e.originalEvent.dataTransfer.setData('end', end);
       e.originalEvent.dataTransfer.effectAllowed = 'move';
       e.originalEvent.dataTransfer.dropEffect = 'move';
     }).on('dragover', (e) => {
