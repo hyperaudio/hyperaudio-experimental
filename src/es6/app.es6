@@ -5,6 +5,7 @@ import Tether from 'tether';
 import Tooltip from 'tether-tooltip';
 // import Drop from 'tether-drop';
 // import Shepherd from 'tether-shepherd';
+import Trianglify from 'trianglify';
 
 const d = debug('ha');
 
@@ -221,6 +222,7 @@ $('.hyperaudio-sink').each((s, sink) => {
       return false;
     }).on('dragend', (e) => {
       section.remove();
+      // TODO: remove video if no other segment references it
     });
 
     // TODO look for [src=""]?
@@ -264,7 +266,6 @@ $('.hyperaudio-sink').each((s, sink) => {
     e.stopPropagation();
   }).on('dragend', (e) => {
     $sink.find('.over').removeClass('over');
-    // section.remove();
   });
 });
 
@@ -298,6 +299,7 @@ $('.hyperaudio-sink').each((s, sink) => {
 
 // modals
 
+
 $('#browse').click(() => {
   $('#browser').addClass('is-active');
 });
@@ -313,6 +315,24 @@ $('#export').click(() => {
 $('#exporter .modal-close').click(() => {
   $('#exporter').removeClass('is-active');
 });
+
+
+// let pattern = Trianglify({
+//   width: window.innerWidth,
+//   height: window.innerHeight,
+//   x_colors: 'Greys',
+// });
+//
+// $('.modal-background').css('background-image', `url(${pattern.png()})`);
+
+// pattern = Trianglify({
+//   width: $('.hyperaudio-sink').width(),
+//   height: $('.hyperaudio-sink').height(),
+//   x_colors: 'Greys',
+// });
+//
+// $('.hyperaudio-sink').css('background-image', `url(${pattern.png()})`);
+
 
 // tour
 
