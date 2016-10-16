@@ -117,7 +117,12 @@ article {
   height: calc(100% - 360px);
   overflow: auto;
   color: #222;
-  padding: 1em;
+  padding-top: 1em;
+
+  section {
+    padding-left: 1em;
+    padding-right: 1em;
+  }
 }
 
 .mask {
@@ -141,7 +146,7 @@ article {
   article {
     section {
       // cursor: move;
-      border-left: 1px solid blue;
+      border-left: 1px solid transparent;
 
       &.active {
         border-left: 1px solid red;

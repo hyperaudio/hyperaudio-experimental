@@ -2,16 +2,18 @@ import debug from 'debug';
 import $ from 'jquery';
 import rangy from 'rangy';
 import Tether from 'tether';
-import Tooltip from 'tether-tooltip';
+// import Tooltip from 'tether-tooltip';
 // import Drop from 'tether-drop';
 // import Shepherd from 'tether-shepherd';
-import Trianglify from 'trianglify';
+// import Trianglify from 'trianglify';
 
 const d = debug('ha');
 
 // PLAYER
 
 const setHead = ($player, $video, time, classNames, skipHead) => {
+  if (window.ignoreVideoEvents) return;
+
   const $sections = $player.find(`article > section[data-src="${$video.attr('src')}"]`);
 
   // let headExists = false;
@@ -23,6 +25,18 @@ const setHead = ($player, $video, time, classNames, skipHead) => {
     const end = $(words[words.length - 1]).data('m');
 
     if (time < start || time >= end) {
+      if ($section.hasClass('active')) {
+        $video.get(0).pause();
+        const next = $section.next('section');
+        if (next.length > 0) {
+          window.ignoreVideoEvents = true;
+          $(next.find('span').get(0)).trigger('click');
+          // $video.get(0).play();
+          window.ignoreVideoEvents = false;
+        }
+        break;
+      }
+
       $section.find('p.active').removeClass('active');
       continue;
     }
