@@ -156,6 +156,31 @@ article section {
 
 article span {
   font-weight: bold;
+  white-space: nowrap;
+  // display: inline-block;
+  // border-bottom: 2px solid transparent;
+  // position: relative;
+  //
+  // &:after {
+  //   content: '';
+  //   position: absolute;
+  //   bottom: 2px;
+  //   left: 0;
+  //   width: 0;
+  //   height: 0px;
+  //   border-bottom: 1px solid black;
+  //   // -webkit-transform: scaleX(0);
+  //   // -ms-transform: scaleX(0);
+  //   // transform: scaleX(0);
+  //   // -webkit-transition: -webkit-transform 0.2s ease-in;
+  //   // transition: transform: 0.2s ease-in;
+  //   transition-duration: 200ms; //attr(data-d ms, 200);
+  // }
+  //
+  // &:hover:after {
+  //   // transform: scaleX(1);
+  //   width:100%;
+  // }
 }
 
 .active {
@@ -182,9 +207,22 @@ section.active p.active .head ~ span {
   font-weight: normal;
 }
 
-.high {
-  outline: 1px solid red;
+.duration {
+  // outline: 1px solid red;
+  text-decoration: underline;
 }
+
+.end {
+  // outline: 1px solid red;
+  // text-decoration: line-through;
+  // border-bottom: 2px solid blue;
+  background-color: lightyellow;
+}
+
+.next {
+  // outline: 1px solid blue;
+}
+
 
 article.over {
   background-color: lightyellow;

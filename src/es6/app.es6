@@ -11,43 +11,86 @@ const d = debug('ha');
 
 // PLAYER
 
-const setHead = ($player, $video, time) => {
-  $player.find(`article > section[data-src="${$video.attr('src')}"]`).each((s, section) => {
+const setHead = ($player, $video, time, classNames, skipHead) => {
+  const $sections = $player.find(`article > section[data-src="${$video.attr('src')}"]`);
+
+  // let headExists = false;
+  for (const section of $sections) {
     const $section = $(section);
     const words = $section.find('> p > span');
 
     const start = $(words[0]).data('m');
     const end = $(words[words.length - 1]).data('m');
 
-    if (time < start || time > end) {
+    if (time < start || time >= end) {
       $section.find('p.active').removeClass('active');
-      return;
+      break;
     }
+    // headExists = true;
 
     for (let i = 0; i < words.length; i++) {
       const word = words[i];
       const $word = $(word);
+      const tc = $word.data('m');
+      const duration = $word.data('d');
 
-      if ($word.data('m') > time) {
+      if (time >= tc && time < tc + duration) {
         if ($word.hasClass('head')) break;
+        if (classNames) $word.addClass(classNames);
 
-        // debug:
-        $word.addClass('high');
-        setTimeout(() => { $word.removeClass('high'); }, 200);
+        if (!$word.hasClass('duration')) {
+          $word.addClass('duration');
 
-        $word.addClass('head').parent().addClass('active');
-        $player.find('article span.head').not(word).each((h, head) => {
-          if ($(head).data('m') !== $word.data('m')) $(head).removeClass('head');
-        });
+          // sync on duration
+          setTimeout(() => {
+            $word.removeClass('duration');
+            if (classNames) $word.removeClass(classNames);
+            // sync
+            // setHead($player, $video, $video.get(0).currentTime);
+            // if (!$video.get(0).paused) {
+            //   // jump to end
+            //   setHead($player, $video, time + $word.data('d'), 'end', false);
+            // }
+          }, tc + duration - 1000 * $video.get(0).currentTime);
+        }
 
-        $section.find('p.active').not($word.parent()).removeClass('active');
+        if (!$word.hasClass('next')) {
+          // find next
+          if (i < words.length - 1) {
+            setTimeout(() => {
+              // jump to next
+              if (!$video.get(0).paused) {
+                setHead($player, $video, $(words[i + 1]).data('m'), 'next', true);
+              }
+              // sync
+              setHead($player, $video, 1000 * $video.get(0).currentTime, 'next', false);
+            }, $(words[i + 1]).data('m') - 1000 * $video.get(0).currentTime);
+          }
+        }
 
-        // TODO scroll if available and only in active section
-        // words[i].scrollIntoView({ block: 'end', behavior: 'smooth' });
+        if (!skipHead) {
+          $word.addClass('head').parent().addClass('active');
+          $player.find('article span.head').not(word).each((h, head) => {
+            if ($(head).data('m') !== $word.data('m')) $(head).removeClass('head');
+          });
+
+          $section.find('p.active').not($word.parent()).removeClass('active');
+
+          // TODO scroll if available and only in active section
+          // words[i].scrollIntoView({ block: 'end', behavior: 'smooth' });
+        }
+
         break;
       }
     }
-  });
+  }
+
+  // if (!headExists && !$video.get(0).paused) {
+  //   $video.get(0).pause();
+  //
+  //   // next section
+  //   $($player.find('article section.active').next('section').find('span').get(0)).trigger('click');
+  // }
 };
 
 const hookVideos = ($player) => {
