@@ -72,6 +72,18 @@ main, main > section {
   }
 }
 
+// .hyperaudio-source {
+//   article section {
+//     user-select: none;
+//     -webkit-user-select: none;
+//
+//     span {
+//       user-select: auto;
+//       -webkit-user-select: auto;
+//     }
+//   }
+// }
+
 .hyperaudio-sink header > a {
   left: auto;
   right: 0;
@@ -175,5 +187,8 @@ section.active p.active .head ~ span {
 }
 
 .over {
-  outline: 2px dashed #000;
+  // border-top: 2px dashed yellow;
+  // padding-top: 1em;
+  // margin-top: 1em;
+  background-color: lightyellow;
 }
