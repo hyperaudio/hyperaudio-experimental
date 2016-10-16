@@ -24,7 +24,7 @@ const setHead = ($player, $video, time, classNames, skipHead) => {
 
     if (time < start || time >= end) {
       $section.find('p.active').removeClass('active');
-      break;
+      continue;
     }
     // headExists = true;
 
