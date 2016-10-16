@@ -9,6 +9,22 @@ import Tether from 'tether';
 
 const d = debug('ha');
 
+const TC = (time) => {
+  const fps = 30;
+
+  let frames = parseInt(Math.floor((time % 1000) * fps / 1000), 10);
+  let seconds = parseInt((time / 1000) % 60, 10);
+  let minutes = parseInt((time / (1000 * 60)) % 60, 10);
+  let hours = parseInt((time / (1000 * 60 * 60)) % 24, 10);
+
+  hours = (hours < 10) ? `0${hours}` : hours;
+  minutes = (minutes < 10) ? `0${minutes}` : minutes;
+  seconds = (seconds < 10) ? `0${seconds}` : seconds;
+  frames = (frames < 10) ? `0${frames}` : frames;
+
+  return `${hours}:${minutes}:${seconds}:${frames}`;
+};
+
 // PLAYER
 
 const setHead = ($player, $video, time, classNames, skipHead) => {
@@ -22,10 +38,10 @@ const setHead = ($player, $video, time, classNames, skipHead) => {
     const words = $section.find('> p > span');
 
     const start = $(words[0]).data('m');
-    const end = $(words[words.length - 1]).data('m');
+    const end = $(words[words.length - 1]).data('m') + $(words[words.length - 1]).data('d');
 
     if (time < start || time >= end) {
-      if ($section.hasClass('active')) {
+      if ($section.hasClass('active') && !$video.get(0).paused) {
         $video.get(0).pause();
         const next = $section.next('section');
         if (next.length > 0) {
@@ -49,10 +65,10 @@ const setHead = ($player, $video, time, classNames, skipHead) => {
       const duration = $word.data('d');
 
       if (time >= tc && time < tc + duration) {
-        if ($word.hasClass('head')) break;
+        if (!$video.get(0).paused && $word.hasClass('head')) break;
         if (classNames) $word.addClass(classNames);
 
-        if (!$word.hasClass('duration')) {
+        if (!$video.get(0).paused && !$word.hasClass('duration')) {
           $word.addClass('duration');
 
           // sync on duration
@@ -68,7 +84,7 @@ const setHead = ($player, $video, time, classNames, skipHead) => {
           }, tc + duration - 1000 * $video.get(0).currentTime);
         }
 
-        if (!$word.hasClass('next')) {
+        if (!$video.get(0).paused && !$word.hasClass('next')) {
           // find next
           if (i < words.length - 1) {
             setTimeout(() => {
@@ -77,7 +93,7 @@ const setHead = ($player, $video, time, classNames, skipHead) => {
                 setHead($player, $video, $(words[i + 1]).data('m'), 'next', true);
               }
               // sync
-              setHead($player, $video, 1000 * $video.get(0).currentTime, 'next', false);
+              if (!$video.get(0).paused) setHead($player, $video, 1000 * $video.get(0).currentTime, 'next', false);
             }, $(words[i + 1]).data('m') - 1000 * $video.get(0).currentTime);
           }
         }
@@ -114,7 +130,7 @@ const hookVideos = ($player) => {
     if (! $video.hasClass('hyperaudio-enabled')) {
       $video.on('timeupdate', () => {
         const time = Math.ceil(video.currentTime * 1000);
-        $player.find('article').attr('data-current-time', time);
+        $player.find('article').attr('data-current-time', TC(time));
         setHead($player, $video, time);
       }).addClass('hyperaudio-enabled');
     }
@@ -127,7 +143,7 @@ $('.hyperaudio-player').each((p, player) => {
   // add titles
   $player.find('span[data-m]').each((s, span) => {
     const $span = $(span);
-    $span.attr('title', `${$span.data('m')} - ${$span.data('m') + $span.data('d')}`);
+    $span.attr('title', `${TC($span.data('m'))} - ${TC($span.data('m') + $span.data('d'))}`);
   });
 
   $player.click((e) => {
@@ -227,8 +243,8 @@ $('.hyperaudio-source').each((s, source) => {
       mask.appendTo($source.find('article section'));
       mask.on('dragstart', (e) => {
         e.originalEvent.dataTransfer.setData('html', mask.data('html'));
-        e.originalEvent.dataTransfer.setData('start', $(mask.find('span').get(0)).data('m'));
-        e.originalEvent.dataTransfer.setData('end', $(mask.find('span').last().get(0)).data('m') + $(mask.find('span').last().get(0)).data('d'));
+        e.originalEvent.dataTransfer.setData('start', TC($(mask.find('span').get(0)).data('m')));
+        e.originalEvent.dataTransfer.setData('end', TC($(mask.find('span').last().get(0)).data('m') + $(mask.find('span').last().get(0)).data('d')));
         e.originalEvent.dataTransfer.setData('src', $source.find('article section').data('src'));
         e.originalEvent.dataTransfer.effectAllowed = 'copy';
         e.originalEvent.dataTransfer.dropEffect = 'copy';
