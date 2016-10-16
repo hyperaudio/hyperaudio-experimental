@@ -2,12 +2,12 @@
 @import "../../node_modules/bulma/bulma";
 
 // FIXME
-@import "../../node_modules/tether-tooltip/dist/css/tooltip-theme-arrows";
-@import "../../node_modules/tether-drop/dist/css/drop-theme-arrows-bounce-dark";
-@import "../../node_modules/tether-shepherd/dist/css/shepherd-theme-square-dark";
-.tooltip-content {
-  background-color: red !important;
-}
+// @import "../../node_modules/tether-tooltip/dist/css/tooltip-theme-arrows";
+// @import "../../node_modules/tether-drop/dist/css/drop-theme-arrows-bounce-dark";
+// @import "../../node_modules/tether-shepherd/dist/css/shepherd-theme-square-dark";
+// .tooltip-content {
+//   background-color: red !important;
+// }
 
 html, body {
   height: 100%;
@@ -151,7 +151,7 @@ article {
 }
 
 article section {
-  margin-bottom: 1em;
+  padding-bottom: 1em;
 }
 
 article span {
@@ -186,9 +186,14 @@ section.active p.active .head ~ span {
   outline: 1px solid red;
 }
 
-.over {
-  // border-top: 2px dashed yellow;
+article.over {
+  background-color: lightyellow;
+  // background-image:  url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAH0lEQVQIW2NkQAU+jEh8HwYGhi0wATAHJAkSgHNAAgBV7gNRbmnIiQAAAABJRU5ErkJggg==");
+  // background-repeat: repeat;
+}
+
+section.over {
+  border-top: 2em solid lightyellow;
   // padding-top: 1em;
   // margin-top: 1em;
-  background-color: lightyellow;
 }

@@ -3,7 +3,7 @@ import $ from 'jquery';
 import rangy from 'rangy';
 import Tether from 'tether';
 import Tooltip from 'tether-tooltip';
-import Drop from 'tether-drop';
+// import Drop from 'tether-drop';
 // import Shepherd from 'tether-shepherd';
 
 const d = debug('ha');
@@ -197,8 +197,9 @@ $('.hyperaudio-sink').each((s, sink) => {
     return false;
   }).on('drop', (e) => {
     e.preventDefault();
-    $sink.find('.over').removeClass('over');
 
+    const $target = $sink.find('.over');
+    $target.removeClass('over');
 
     if (tether) tether.destroy();
     $('.tether-element').remove();
@@ -218,6 +219,8 @@ $('.hyperaudio-sink').each((s, sink) => {
     }).on('dragover', (e) => {
       e.preventDefault();
       return false;
+    }).on('dragend', (e) => {
+      section.remove();
     });
 
     // TODO look for [src=""]?
@@ -241,7 +244,11 @@ $('.hyperaudio-sink').each((s, sink) => {
       $sink.find('>header').append(video);
     }
 
-    $sink.find('article').append(section);
+    if ($target.get(0).nodeName === 'ARTICLE') {
+      $sink.find('article').append(section);
+    } else {
+      section.insertBefore($target);
+    }
   }).on('dragenter', (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -257,34 +264,39 @@ $('.hyperaudio-sink').each((s, sink) => {
     e.stopPropagation();
   }).on('dragend', (e) => {
     $sink.find('.over').removeClass('over');
+    // section.remove();
   });
 });
 
 // drop
+//
+// new Drop({
+//   target: document.querySelector('video'),
+//   content: 'TODO: video metadata',
+//   classes: 'drop-theme-arrows-bounce-dark',
+//   position: 'bottom center',
+//   openOn: 'click',
+// });
 
-new Drop({
-  target: document.querySelector('video'),
-  content: 'TODO: video metadata',
-  classes: 'drop-theme-arrows-bounce-dark',
-  position: 'bottom center',
-  openOn: 'click',
-});
+
+// tooltips
+//
+// new Tooltip({
+//   target: $('#browse').get(0),
+//   content: 'Browse/search videos',
+//   classes: 'tooltip-theme-arrows',
+//   position: 'bottom left',
+// });
+//
+// new Tooltip({
+//   target: $('#export').get(0),
+//   content: 'Export/share remix',
+//   classes: 'tooltip-theme-arrows',
+//   position: 'bottom right',
+// });
+
 
 // modals
-
-new Tooltip({
-  target: $('#browse').get(0),
-  content: 'Browse/search videos',
-  classes: 'tooltip-theme-arrows',
-  position: 'bottom left',
-});
-
-new Tooltip({
-  target: $('#export').get(0),
-  content: 'Export/share remix',
-  classes: 'tooltip-theme-arrows',
-  position: 'bottom right',
-});
 
 $('#browse').click(() => {
   $('#browser').addClass('is-active');
