@@ -110,20 +110,31 @@ let tether;
 $('.hyperaudio-source').each((s, source) => {
   const $source = $(source);
 
+  // $source.find('article section').contents().each((n, node) => {
+  //   if (node.nodeName !== 'P') $(node).remove();
+  // });
+
   $source.find('article').mouseup(() => {
     const selection = rangy.getSelection();
+    d(selection.anchorNode, selection.focusNode);
 
     const range = rangy.createRange();
     let anchor = selection.anchorNode.parentNode;
-
     let start = selection.anchorNode.parentNode;
     let end = selection.focusNode.parentNode;
+
+    if (selection.focusNode.nodeName === 'P') end = selection.focusNode.previousElementSibling.lastElementChild;
+    d(start, end);
 
     if (start.parentNode !== end.parentNode) {
       anchor = anchor.parentNode;
       start = start.parentNode;
       end = end.parentNode;
     }
+    d(start, end);
+
+
+    // if (end.nodeName === 'ARTICLE') start = end;
 
     range.setStartBefore(start);
     range.setEndAfter(end);
@@ -183,9 +194,11 @@ $('.hyperaudio-sink').each((s, sink) => {
 
   $sink.find('article').on('dragover', (e) => {
     e.preventDefault();
+    return false;
   }).on('drop', (e) => {
     e.preventDefault();
-    $sink.find('section.over').removeClass('over');
+    $sink.find('.over').removeClass('over');
+
 
     if (tether) tether.destroy();
     $('.tether-element').remove();
@@ -202,10 +215,9 @@ $('.hyperaudio-sink').each((s, sink) => {
       e.originalEvent.dataTransfer.setData('src', src);
       e.originalEvent.dataTransfer.effectAllowed = 'move';
       e.originalEvent.dataTransfer.dropEffect = 'move';
-    }).on('dragenter', (e) => {
-      section.addClass('over');
-    }).on('dragleave', (e) => {
-      section.removeClass('over');
+    }).on('dragover', (e) => {
+      e.preventDefault();
+      return false;
     });
 
     // TODO look for [src=""]?
@@ -230,6 +242,21 @@ $('.hyperaudio-sink').each((s, sink) => {
     }
 
     $sink.find('article').append(section);
+  }).on('dragenter', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // console.log(e.target);
+    $sink.find('.over').removeClass('over');
+    let target = $(e.target).closest('section[data-src]');
+    if (target.length === 0) target = $(e.target);
+    target.addClass('over');
+  }).on('dragleave', (e) => {
+    // $(e.target).closest('section[data-src]').removeClass('over');
+  }).on('dragover', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }).on('dragend', (e) => {
+    $sink.find('.over').removeClass('over');
   });
 });
 
