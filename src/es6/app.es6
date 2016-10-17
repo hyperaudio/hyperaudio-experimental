@@ -2,10 +2,6 @@ import debug from 'debug';
 import $ from 'jquery';
 import rangy from 'rangy';
 import Tether from 'tether';
-// import Tooltip from 'tether-tooltip';
-// import Drop from 'tether-drop';
-// import Shepherd from 'tether-shepherd';
-// import Trianglify from 'trianglify';
 
 const d = debug('ha');
 
@@ -129,7 +125,7 @@ const hookVideos = ($player) => {
 
     if (! $video.hasClass('hyperaudio-enabled')) {
       $video.on('timeupdate', () => {
-        const time = Math.ceil(video.currentTime * 1000);
+        const time = Math.floor(video.currentTime * 1000);
         $player.find('article').attr('data-current-time', TC(time));
         setHead($player, $video, time);
       }).addClass('hyperaudio-enabled');
@@ -169,8 +165,12 @@ $('.hyperaudio-player').each((p, player) => {
       } else {
         for (const video of videoElements) {
           if ($(video).attr('src') === src) {
+            $(video).show();
             video.currentTime = m / 1000;
-            break;
+            // break;
+          } else {
+            video.pause();
+            $(video).hide();
           }
         }
       }
@@ -294,7 +294,7 @@ $('.hyperaudio-sink').each((s, sink) => {
     const start = e.originalEvent.dataTransfer.getData('start');
     const end = e.originalEvent.dataTransfer.getData('end');
 
-    const section = $(`<section draggable="true" data-src=${src} data-start=${start} data-end=${end}></section>`);
+    const section = $(`<section draggable="true" data-src="${src}" data-start=${start} data-end=${end}></section>`);
     section.html(html);
 
     section.on('dragstart', (e) => {
@@ -317,8 +317,12 @@ $('.hyperaudio-sink').each((s, sink) => {
     let found = false;
     for (const video of videoElements) {
       if ($(video).attr('src') === src) {
+        $(video).show();
         found = true;
-        break;
+        // break;
+      } else {
+        video.pause();
+        $(video).hide();
       }
     }
 
@@ -356,33 +360,77 @@ $('.hyperaudio-sink').each((s, sink) => {
   });
 });
 
-// drop
-//
-// new Drop({
-//   target: document.querySelector('video'),
-//   content: 'TODO: video metadata',
-//   classes: 'drop-theme-arrows-bounce-dark',
-//   position: 'bottom center',
-//   openOn: 'click',
-// });
+
+// load
+
+const loadTranscript = (src, transcript) => {
+  const $source = $('.hyperaudio-source');
+  $source.find('video').remove();
+  $source.find('section').remove();
+
+  $.get(transcript, (data) => {
+    // console.log(data);
+    const $section = $(`<section data-src="${src}" data-start="0" data-end="0"></section>`);
+
+    for (const segment of data) {
+      const p = $('<p></p>');
+      for (const word of segment.words) {
+        const s = $(`<span data-m="${Math.floor(word.start * 1000)}" data-d="${Math.floor((word.end - word.start) * 1000)}"></span>`);
+        s.text(word.word + ' ');
+
+        s.appendTo(p);
+      }
+
+      p.appendTo($section);
+    }
+
+    $section.attr('data-start', $section.find('span[data-m]').first().data('m'));
+    $section.attr('data-end', $section.find('span[data-m]').last().data('m') + $section.find('span[data-m]').last().data('d'));
+
+    $section.appendTo($source.find('article'));
+    $section.find('span[data-m]').first().trigger('click');
+  }, 'json');
+};
 
 
-// tooltips
-//
-// new Tooltip({
-//   target: $('#browse').get(0),
-//   content: 'Browse/search videos',
-//   classes: 'tooltip-theme-arrows',
-//   position: 'bottom left',
-// });
-//
-// new Tooltip({
-//   target: $('#export').get(0),
-//   content: 'Export/share remix',
-//   classes: 'tooltip-theme-arrows',
-//   position: 'bottom right',
-// });
+// MEH
+$.get('data/transcripts.json', (transcripts) => {
+  for (const transcript of transcripts) {
+    const src = `https://s3.amazonaws.com/ingest.spintime.tv/${(transcript.startsWith('00/') ? 'itp-spintime-tv.s3.amazonaws.com/' : 'videogrep-allvideos/' ) + transcript.replace('.transcription.json', '').replace('00/', '')}`;
 
+    // https://s3.amazonaws.com/ingest.spintime.tv/videogrep-allvideos/2015_New_Hampshire_Democratic_Party_State_Convention_part_1-413906_1.mp4
+
+    const json = `data/bulk/${transcript.replace('00/', '')}`;
+    const thumb = 'http://placehold.it/128x128'; //  `http://media.spintime.tv.s3-website-us-east-1.amazonaws.com/${transcript.replace('.mp4.transcription.json', '')}_1.jpg`;
+    const title = transcript.replace(/_/g, ' ');
+    const duration = '';
+    const description = '…';
+
+    const $entry = $(`<article class="media" data-src="${src}"
+    data-transcript="${json}">
+      <figure class="media-left">
+        <p class="image is-4by3" style="width: 5em">
+          <img src="${thumb}">
+        </p>
+      </figure>
+      <div class="media-content">
+        <div class="content">
+          <p>
+            <strong class="link">${title}</strong> <small>${duration}</small>
+            <br>${description}
+          </p>
+        </div>
+      </div>
+    </article>`);
+
+    $entry.appendTo('#browser .box');
+  }
+
+  // hook
+  $('#browser .link').click((e) => {
+    loadTranscript($(e.target).closest('article').data('src'), $(e.target).closest('article').data('transcript'));
+  });
+}, 'json');
 
 // modals
 
@@ -404,41 +452,8 @@ $('#exporter .modal-close').click(() => {
 });
 
 
-// let pattern = Trianglify({
-//   width: window.innerWidth,
-//   height: window.innerHeight,
-//   x_colors: 'Greys',
-// });
-//
-// $('.modal-background').css('background-image', `url(${pattern.png()})`);
-
-// pattern = Trianglify({
-//   width: $('.hyperaudio-sink').width(),
-//   height: $('.hyperaudio-sink').height(),
-//   x_colors: 'Greys',
-// });
-//
-// $('.hyperaudio-sink').css('background-image', `url(${pattern.png()})`);
-
-
-// tour
-
-// const tour = new Shepherd.Tour({
-//   defaults: {
-//     classes: 'shepherd-theme-square-dark',
-//   },
-// });
-//
-// tour.addStep('example', {
-//   title: 'Example Shepherd',
-//   text: 'Creating a Shepherd is easy too! Just create ...',
-//   attachTo: '#browse',
-//   advanceOn: '.docs-link click',
-// });
-
-// tour.start();
-
 // debug
 window.debug = debug;
 window.$ = $;
 window.rangy = rangy;
+window.loadTranscript = loadTranscript;

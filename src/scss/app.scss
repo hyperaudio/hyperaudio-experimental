@@ -1,4 +1,4 @@
-@import 'https://fonts.googleapis.com/css?family=Fira+Mono';
+@import 'https://fonts.googleapis.com/css?family=Fira+Mono|Fira+Sans';
 @import "../../node_modules/bulma/bulma";
 
 // FIXME
@@ -14,7 +14,7 @@ html, body {
   // min-height: 100vh;
   // max-height: 100%;
   overflow: hidden;
-  font-family: 'Fira Mono', monospace;
+  font-family: 'Fira Sans', sans-serif;
 }
 
 main, main > section {
@@ -120,7 +120,7 @@ video {
 //   }
 // }
 
-article {
+.hyperaudio-player article {
   // height: 100%;
   height: calc(100% - 360px);
   overflow: auto;
@@ -130,6 +130,7 @@ article {
   section {
     padding-left: 1em;
     padding-right: 1em;
+    font-family: 'Fira Mono', monospace;
   }
 
   &:before {
@@ -182,7 +183,7 @@ article section {
 
 article span {
   font-weight: bold;
-  white-space: nowrap;
+  // white-space: nowrap;
   // display: inline-block;
   // border-bottom: 2px solid transparent;
   // position: relative;
