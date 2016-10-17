@@ -11,25 +11,25 @@ const fs = require('fs');
 
 
 function onError(err) {
-	$.util.beep();
-	$.util.log($.util.colors.red('Compilation Error\n'), err.toString());
-	this.emit('end');
+  $.util.beep();
+  $.util.log($.util.colors.red('Compilation Error\n'), err.toString());
+  this.emit('end');
 }
 
 /**
  * This task removes all files inside the 'dist' directory.
  */
 gulp.task('clean', () =>
-	del.sync('./dist/**/*')
+  del.sync('./dist/**/*')
 );
 
 /**
  * Media
  */
 gulp.task('buildmedia', () =>
-	gulp.src(['./src/media/**'])
-		.pipe($.plumber())
-		.pipe(gulp.dest('./dist/media'))
+  gulp.src(['./src/media/**'])
+    .pipe($.plumber())
+    .pipe(gulp.dest('./dist/media'))
 );
 
 /**
@@ -39,18 +39,18 @@ gulp.task('cleanhtml', del.bind(null, ['tmp/**/*.html']));
 
 
 gulp.task('html', () =>
-	gulp
-		.src('./src/html/**/*.html')
-		.pipe(gulp.dest('./tmp'))
-		.pipe(browserSync.stream({ once: true }))
+  gulp
+    .src('./src/html/**/*.html')
+    .pipe(gulp.dest('./tmp'))
+    .pipe(browserSync.stream({ once: true }))
 );
 
 
 gulp.task('buildhtml', ['html'], () =>
-	gulp
-		.src('./tmp/**/*.html')
-		// .pipe($.htmlmin({ collapseWhitespace: true }))
-		.pipe(gulp.dest('./dist'))
+  gulp
+    .src('./tmp/**/*.html')
+    // .pipe($.htmlmin({ collapseWhitespace: true }))
+    .pipe(gulp.dest('./dist'))
 );
 
 /**
@@ -59,37 +59,37 @@ gulp.task('buildhtml', ['html'], () =>
 gulp.task('cleanjs', del.bind(null, ['./tmp/js/**/*']));
 
 function bundleJs(watch) {
-	const customOpts = {
-		entries: ['./src/es6/app.es6'],
-		transform: ['babelify'],
-		debug: true, // Enables source maps
-	};
-	const opts = Object.assign({}, browserify.args, customOpts);
-	const b =  watch ? watchify(browserify(opts)) : browserify(opts);
+  const customOpts = {
+    entries: ['./src/es6/app.es6'],
+    transform: ['babelify'],
+    debug: true, // Enables source maps
+  };
+  const opts = Object.assign({}, browserify.args, customOpts);
+  const b =  watch ? watchify(browserify(opts)) : browserify(opts);
 
-	return b.bundle()
-		.on('error', onError)
-		.pipe($.plumber())
-		.pipe(source('app.es6'))
-		.pipe(buffer())
-		.pipe($.sourcemaps.init({ loadMaps: true }))
-		// .pipe($.uglify())
-		.pipe($.rename({
-			extname: '.js',
-		}))
-		.pipe($.sourcemaps.write())
-		.pipe(gulp.dest('./tmp/js'))
-		.pipe(browserSync.stream({ once: true }));
+  return b.bundle()
+    .on('error', onError)
+    .pipe($.plumber())
+    .pipe(source('app.es6'))
+    .pipe(buffer())
+    .pipe($.sourcemaps.init({ loadMaps: true }))
+    // .pipe($.uglify())
+    .pipe($.rename({
+      extname: '.js',
+    }))
+    .pipe($.sourcemaps.write())
+    .pipe(gulp.dest('./tmp/js'))
+    .pipe(browserSync.stream({ once: true }));
 }
 
 gulp.task('js', ['cleanjs'], () => bundleJs());
 gulp.task('watchjs', ['cleanjs'], () => bundleJs(true));
 
 gulp.task('buildjs', ['js'], () =>
-	gulp
-		.src('./tmp/js/*.js')
-		// .pipe($.uglify())
-		.pipe(gulp.dest('./dist/js'))
+  gulp
+    .src('./tmp/js/*.js')
+    // .pipe($.uglify())
+    .pipe(gulp.dest('./dist/js'))
 );
 
 /**
@@ -98,27 +98,27 @@ gulp.task('buildjs', ['js'], () =>
 gulp.task('cleancss', del.bind(null, ['./tmp/css/**/*']));
 
 gulp.task('css', ['cleancss'], () =>
-	gulp
-		.src('./src/scss/**/*.scss')
-		.pipe($.plumber({
-			errorHandler: onError,
-		}))
-		.pipe($.sourcemaps.init())
-		.pipe($.sass({
-			// outputStyle: 'compressed',
-			onError: console.error.bind(console, 'Sass error:'),
-		}))
-		.pipe($.autoprefixer())
-		.pipe($.sourcemaps.write(''))
-		.pipe(gulp.dest('./tmp/css'))
-		.pipe(browserSync.stream())
+  gulp
+    .src('./src/scss/**/*.scss')
+    .pipe($.plumber({
+      errorHandler: onError,
+    }))
+    .pipe($.sourcemaps.init())
+    .pipe($.sass({
+      // outputStyle: 'compressed',
+      onError: console.error.bind(console, 'Sass error:'),
+    }))
+    .pipe($.autoprefixer())
+    .pipe($.sourcemaps.write(''))
+    .pipe(gulp.dest('./tmp/css'))
+    .pipe(browserSync.stream())
  );
 
 gulp.task('buildcss', ['css'], () =>
-	gulp
-		.src('./tmp/css/*.css')
-		// .pipe($.uglifycss())
-		.pipe(gulp.dest('./dist/css'))
+  gulp
+    .src('./tmp/css/*.css')
+    // .pipe($.uglifycss())
+    .pipe(gulp.dest('./dist/css'))
 );
 
 
@@ -132,46 +132,46 @@ gulp.task('clean', del.bind(null, ['tmp', 'dist']));
 
 
 gulp.task('watch', ['dev', 'watchjs'], () => {
-	gulp.watch('src/es6/**/*', ['js']);
-	gulp.watch('src/scss/**/*', ['css']);
-	gulp.watch('src/html/**/*', ['html']);
-	gulp.watch('src/media/**/*').on('change', browserSync.reload);
+  gulp.watch('src/es6/**/*', ['js']);
+  gulp.watch('src/scss/**/*', ['css']);
+  gulp.watch('src/html/**/*', ['html']);
+  gulp.watch('src/media/**/*').on('change', browserSync.reload);
 });
 
 
 function appendHtml(dir, req, res, next) {
-	if (req.url.match(/\/[^.]+$/)) {
-		fs.access(`${dir}${req.url}.html`, fs.F_OK, (err) => {
-			if (!err) {
-				req.url += '.html';
-			}
-			next();
-		});
-	} else {
-		next();
-	}
+  if (req.url.match(/\/[^.]+$/)) {
+    fs.access(`${dir}${req.url}.html`, fs.F_OK, (err) => {
+      if (!err) {
+        req.url += '.html';
+      }
+      next();
+    });
+  } else {
+    next();
+  }
 }
 
 gulp.task('serve', ['watch'], () =>
-	browserSync({
-		server: {
-			baseDir: ['./tmp', './src'],
-			middleware: [
-				appendHtml.bind(this, './tmp'),
-			],
-		},
-	})
+  browserSync({
+    server: {
+      baseDir: ['./tmp', './src'],
+      middleware: [
+        appendHtml.bind(this, './tmp'),
+      ],
+    },
+  })
 );
 
 gulp.task('serve:dist', ['build'], () =>
-	browserSync({
-		server: {
-			baseDir: ['./dist'],
-			middleware: [
-				appendHtml.bind(this, './dist'),
-			],
-		},
-	})
+  browserSync({
+    server: {
+      baseDir: ['./dist'],
+      middleware: [
+        appendHtml.bind(this, './dist'),
+      ],
+    },
+  })
 );
 
 
