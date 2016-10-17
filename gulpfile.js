@@ -33,6 +33,15 @@ gulp.task('buildmedia', () =>
 );
 
 /**
+ * Data
+ */
+gulp.task('builddata', () =>
+  gulp.src(['./src/data/**'])
+    .pipe($.plumber())
+    .pipe(gulp.dest('./dist/data'))
+);
+
+/**
  * Layouts
  */
 gulp.task('cleanhtml', del.bind(null, ['tmp/**/*.html']));
@@ -126,7 +135,7 @@ gulp.task('buildcss', ['css'], () =>
  * Main
  */
 gulp.task('dev', ['html', 'js', 'css']);
-gulp.task('build', ['buildhtml', 'buildjs', 'buildcss', 'buildmedia']);
+gulp.task('build', ['buildhtml', 'buildjs', 'buildcss', 'buildmedia', 'builddata']);
 
 gulp.task('clean', del.bind(null, ['tmp', 'dist']));
 
@@ -136,6 +145,7 @@ gulp.task('watch', ['dev', 'watchjs'], () => {
   gulp.watch('src/scss/**/*', ['css']);
   gulp.watch('src/html/**/*', ['html']);
   gulp.watch('src/media/**/*').on('change', browserSync.reload);
+  gulp.watch('src/data/**/*').on('change', browserSync.reload);
 });
 
 
