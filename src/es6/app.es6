@@ -3,6 +3,7 @@ import $ from 'jquery';
 import rangy from 'rangy';
 import Tether from 'tether';
 import Srt from 'srtjs';
+import Nanobar from 'nanobar';
 
 const d = debug('ha');
 
@@ -372,11 +373,23 @@ const loadTranscript = (src, transcript, type) => {
   $source.find('section').remove();
 
   if (type === 'json') {
+    const nanobar = new Nanobar({
+      classname: 'nano',
+      id: 'nano',
+      target: $('main').get(0),
+    });
+
+    nanobar.go(50);
+
     $.get(transcript, (data) => {
       // console.log(data);
       const $section = $(`<section data-src="${src}" data-start="0" data-end="0"></section>`);
 
+      let i = 0;
       for (const segment of data) {
+        i++;
+        nanobar.go(50 + (50 * i) / data.length);
+
         const p = $('<p></p>');
         for (const word of segment.words) {
           const s = $(`<span data-m="${Math.floor(word.start * 1000)}" data-d="${Math.floor((word.end - word.start) * 1000)}"></span>`);
@@ -396,13 +409,25 @@ const loadTranscript = (src, transcript, type) => {
       $section.find('span[data-m]').first().trigger('click');
     }, 'json');
   } else if (type === 'srt') {
+    const nanobar = new Nanobar({
+      classname: 'nano',
+      id: 'nano',
+      target: $('main').get(0),
+    });
+
+    nanobar.go(50);
+
     $.get(transcript, (srt) => {
       const data = new Srt(srt);
       // console.log(typeof data, data);
 
       const $section = $(`<section data-src="${src}" data-start="0" data-end="0"></section>`);
 
+      let i = 0;
       for (const segment of data.lines) {
+        i++;
+        nanobar.go(50 + (50 * i) / data.lines.length);
+
         const p = $('<p></p>');
 
         segment.words = [];
