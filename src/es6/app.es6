@@ -2,6 +2,7 @@ import debug from 'debug';
 import $ from 'jquery';
 import rangy from 'rangy';
 import Tether from 'tether';
+import Srt from 'srtjs';
 
 const d = debug('ha');
 
@@ -363,33 +364,85 @@ $('.hyperaudio-sink').each((s, sink) => {
 
 // load
 
-const loadTranscript = (src, transcript) => {
+const loadTranscript = (src, transcript, type) => {
+  $('body').addClass('waiting');
+
   const $source = $('.hyperaudio-source');
   $source.find('video').remove();
   $source.find('section').remove();
 
-  $.get(transcript, (data) => {
-    // console.log(data);
-    const $section = $(`<section data-src="${src}" data-start="0" data-end="0"></section>`);
+  if (type === 'json') {
+    $.get(transcript, (data) => {
+      // console.log(data);
+      const $section = $(`<section data-src="${src}" data-start="0" data-end="0"></section>`);
 
-    for (const segment of data) {
-      const p = $('<p></p>');
-      for (const word of segment.words) {
-        const s = $(`<span data-m="${Math.floor(word.start * 1000)}" data-d="${Math.floor((word.end - word.start) * 1000)}"></span>`);
-        s.text(word.word + ' ');
+      for (const segment of data) {
+        const p = $('<p></p>');
+        for (const word of segment.words) {
+          const s = $(`<span data-m="${Math.floor(word.start * 1000)}" data-d="${Math.floor((word.end - word.start) * 1000)}"></span>`);
+          s.text(word.word + ' ');
 
-        s.appendTo(p);
+          s.appendTo(p);
+        }
+
+        p.appendTo($section);
       }
 
-      p.appendTo($section);
-    }
+      $section.attr('data-start', $section.find('span[data-m]').first().data('m'));
+      $section.attr('data-end', $section.find('span[data-m]').last().data('m') + $section.find('span[data-m]').last().data('d'));
 
-    $section.attr('data-start', $section.find('span[data-m]').first().data('m'));
-    $section.attr('data-end', $section.find('span[data-m]').last().data('m') + $section.find('span[data-m]').last().data('d'));
+      $section.appendTo($source.find('article'));
+      $('body').removeClass('waiting');
+      $section.find('span[data-m]').first().trigger('click');
+    }, 'json');
+  } else if (type === 'srt') {
+    $.get(transcript, (srt) => {
+      const data = new Srt(srt);
+      // console.log(typeof data, data);
 
-    $section.appendTo($source.find('article'));
-    $section.find('span[data-m]').first().trigger('click');
-  }, 'json');
+      const $section = $(`<section data-src="${src}" data-start="0" data-end="0"></section>`);
+
+      for (const segment of data.lines) {
+        const p = $('<p></p>');
+
+        segment.words = [];
+        const words = segment.subtitle.split(' ');
+        const start = ((segment.start.hours * 60 + segment.start.minutes) * 60 + segment.start.seconds) * 1000 + segment.start.milliseconds;
+        const end = ((segment.end.hours * 60 + segment.end.minutes) * 60 + segment.end.seconds) * 1000 + segment.end.milliseconds;
+        // const unit = Math.floor((end - start) / words.join('').length);
+        const unit = Math.floor((end - start) / words.length);
+
+        // let prevEnd = start;
+        for (let i = 0; i < words.length; i++) {
+          segment.words.push({
+            word: words[i],
+            // start: prevEnd,
+            // end: prevEnd + (words[i].length * unit),
+            start: start + i * unit,
+            end: start + i * unit + unit,
+          });
+          // prevEnd = prevEnd + (words[i].length * unit);
+        }
+
+
+        for (const word of segment.words) {
+          const s = $(`<span data-m="${Math.floor(word.start)}" data-d="${Math.floor(word.end - word.start)}"></span>`);
+          s.text(word.word + ' ');
+
+          s.appendTo(p);
+        }
+
+        p.appendTo($section);
+      }
+
+      $section.attr('data-start', $section.find('span[data-m]').first().data('m'));
+      $section.attr('data-end', $section.find('span[data-m]').last().data('m') + $section.find('span[data-m]').last().data('d'));
+
+      $section.appendTo($source.find('article'));
+      $('body').removeClass('waiting');
+      $section.find('span[data-m]').first().trigger('click');
+    }, 'text');
+  } else $('body').removeClass('waiting');
 };
 
 
@@ -398,16 +451,14 @@ $.get('data/transcripts.json', (transcripts) => {
   for (const transcript of transcripts) {
     const src = `https://s3.amazonaws.com/ingest.spintime.tv/${(transcript.startsWith('00/') ? 'itp-spintime-tv.s3.amazonaws.com/' : 'videogrep-allvideos/' ) + transcript.replace('.transcription.json', '').replace('00/', '')}`;
 
-    // https://s3.amazonaws.com/ingest.spintime.tv/videogrep-allvideos/2015_New_Hampshire_Democratic_Party_State_Convention_part_1-413906_1.mp4
-
     const json = `data/bulk/${transcript.replace('00/', '')}`;
-    const thumb = 'http://placehold.it/128x128'; //  `http://media.spintime.tv.s3-website-us-east-1.amazonaws.com/${transcript.replace('.mp4.transcription.json', '')}_1.jpg`;
-    const title = transcript.replace(/_/g, ' ');
+    const thumb = 'http://placehold.it/128x128'; //
+    const title = transcript.replace('.transcription.json', '').replace('00/', '').replace(/_/g, ' ');
     const duration = '';
-    const description = '…';
+    const description = '(transcript)';
 
     const $entry = $(`<article class="media" data-src="${src}"
-    data-transcript="${json}">
+    data-transcript="${json}" data-type="json">
       <figure class="media-left">
         <p class="image is-4by3" style="width: 5em">
           <img src="${thumb}">
@@ -428,9 +479,51 @@ $.get('data/transcripts.json', (transcripts) => {
 
   // hook
   $('#browser .link').click((e) => {
-    loadTranscript($(e.target).closest('article').data('src'), $(e.target).closest('article').data('transcript'));
+    $('body').addClass('waiting');
+    loadTranscript($(e.target).closest('article').data('src'), $(e.target).closest('article').data('transcript'), $(e.target).closest('article').data('type'));
+    $('#browser').removeClass('is-active');
   });
 }, 'json');
+
+
+$.get('data/captions.json', (captions) => {
+  for (const transcript of captions) {
+    const src = `https://s3.amazonaws.com/ingest.spintime.tv/itp-spintime-tv.s3.amazonaws.com/${transcript.replace('.srt', '.mp4').replace('00/', '')}`;
+
+    const srt = `data/bulk/${transcript.replace('00/', '')}`;
+    const thumb = 'http://placehold.it/128x128'; //  `http://media.spintime.tv.s3-website-us-east-1.amazonaws.com/${transcript.replace('.mp4.transcription.json', '')}_1.jpg`;
+    const title = transcript.replace('.srt', '').replace('.x264-[2Maverick]', '').replace(/\./g, ' ');
+    const duration = '';
+    const description = '(captions)';
+
+    const $entry = $(`<article class="media" data-src="${src}"
+    data-transcript="${srt}" data-type="srt">
+      <figure class="media-left">
+        <p class="image is-4by3" style="width: 5em">
+          <img src="${thumb}">
+        </p>
+      </figure>
+      <div class="media-content">
+        <div class="content">
+          <p>
+            <strong class="link">${title}</strong> <small>${duration}</small>
+            <br>${description}
+          </p>
+        </div>
+      </div>
+    </article>`);
+
+    $entry.appendTo('#browser .box');
+  }
+
+  // hook
+  $('#browser .link').click((e) => {
+    $('body').addClass('waiting');
+    loadTranscript($(e.target).closest('article').data('src'), $(e.target).closest('article').data('transcript'), $(e.target).closest('article').data('type'));
+    $('#browser').removeClass('is-active');
+  });
+}, 'json');
+
 
 // modals
 

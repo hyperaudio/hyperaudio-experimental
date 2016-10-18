@@ -9,6 +9,13 @@
 //   background-color: red !important;
 // }
 
+.pace {
+  z-index: 50000;
+}
+.pace .pace-progress {
+  background-color: red;
+}
+
 html, body {
   height: 100%;
   // min-height: 100vh;
@@ -263,6 +270,13 @@ section.over {
   // margin-top: 1em;
 }
 
+#browser .link {
+  cursor: pointer;
+}
 // .modal-background {
 //   opacity: 0.8;
 // }
+
+body.waiting {
+  cursor: wait !important;
+}

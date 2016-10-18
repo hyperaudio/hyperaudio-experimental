@@ -4,9 +4,22 @@
   <title>Hyperaudio Experimental</title>
   <meta charset='utf-8' />
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
-  <link rel="stylesheet" media="all" href="/css/app.css" />
   <link rel="icon" type="image/png" href="/media/favicon.ico" />
+
+  <script>
+     window.paceOptions = {
+      elements: false,
+      restartOnRequestAfter: 50,
+      eventLag: {
+        minSamples: 5
+      }
+    };
+  </script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/pace.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/themes/black/pace-theme-flat-top.css">
+
+  <link rel="stylesheet" media="all" href="/css/app.css" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
   <!-- <script src="https://sdk.amazonaws.com/js/aws-sdk-2.6.9.min.js"></script> -->
 </head>
 <body>
