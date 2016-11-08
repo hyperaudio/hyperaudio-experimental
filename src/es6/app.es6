@@ -551,113 +551,142 @@ $.get('data/captions.json', (captions) => {
 }, 'json');
 
 
-// EDL
-const assembleEDL = () => {
+// // EDL
+// const assembleEDL = () => {
+//
+//   /* eslint-disable */
+//   const edl = {
+//     "template": "basic",
+//     "thumbnail": "https://archive.org/pop/resources/icons/fb-logo.png",
+//     "tags": [
+//       "popcorn"
+//     ],
+//     "name": `Remix ${new Date()}`,
+//     "description": "",
+//     "media": [
+//       {
+//         "id": "Media0",
+//         "name": "Media0",
+//         "url": "#t=,7.668800767916412",
+//         "target": "video",
+//         "duration": 7.6688007679164,
+//         "popcornOptions": {
+//           "frameAnimation": true
+//         },
+//         "controls": true,
+//         "tracks": [
+//           {
+//             "name": "",
+//             "id": "0",
+//             "order": 0,
+//             "trackEvents": []
+//           }
+//         ],
+//         "clipData": {},
+//         "currentTime": 0
+//       }
+//     ],
+//     "targets": [
+//       {
+//         "id": "Target0",
+//         "name": "video-container",
+//         "element": "video-container"
+//       }
+//     ]
+//   };
+//
+//
+//   const $sections = $('.hyperaudio-sink article section');
+//
+//   let i = -1;
+//   let start = 0;
+//   let end = 0;
+//   for (const section of $sections) {
+//     i++;
+//     const src = $(section).data('src');
+//     const from1 = $(section).data('start') / 1000;
+//     const duration = $(section).data('end') / 1000;
+//
+//     end = start + duration;
+//
+//     const trackEvent = {
+//       "id": "TrackEvent" + i,
+//       "type": "sequencer",
+//       "popcornOptions": {
+//         "source": [ src ],
+//         "fallback": "",
+//         "denied": false,
+//         "start": start,
+//         "end": end,
+//         "type": "Archive",
+//         "thumbnailSrc": "https://archive.org/download/electricsheep-flock-244-80000-6/electricsheep-flock-244-80000-6.thumbs/00244=80086=79910=77346_000001.jpg",
+//         "from": from1,
+//         "title": "Clip " + i,
+//         "duration": duration,
+//         "linkback": "https://s3.amazonaws.com/ingest.spintime.tv/",
+//         "contentType": "",
+//         "hidden": false,
+//         "target": "video-container",
+//         "width": 100,
+//         "height": 100,
+//         "top": 0,
+//         "left": 0,
+//         "volume": 100,
+//         "mute": false,
+//         "zindex": 1000,
+//         "id": "TrackEvent" + i
+//       },
+//       "track": "0",
+//       "name": "TrackEvent" + i
+//     };
+//
+//     start = end;
+//
+//     edl.media[0].tracks[0].trackEvents.push(trackEvent);
+//
+//     const clip = {
+//       "source": src,
+//       "type": "Archive",
+//       "title": "Clip " + i,
+//       "thumbnail": "https://archive.org/download/electricsheep-flock-244-80000-6/electricsheep-flock-244-80000-6.thumbs/00244=80086=79910=77346_000001.jpg",
+//       "linkback": "https://s3.amazonaws.com/ingest.spintime.tv/",
+//       "duration": duration
+//     };
+//
+//     edl.media[0].clipData[src] = clip;
+//   }
+//
+//   return edl;
+// };
 
-  /* eslint-disable */
-  const edl = {
-    "template": "basic",
-    "thumbnail": "https://archive.org/pop/resources/icons/fb-logo.png",
-    "tags": [
-      "popcorn"
-    ],
-    "name": `Remix ${new Date()}`,
-    "description": "",
-    "media": [
-      {
-        "id": "Media0",
-        "name": "Media0",
-        "url": "#t=,7.668800767916412",
-        "target": "video",
-        "duration": 7.6688007679164,
-        "popcornOptions": {
-          "frameAnimation": true
-        },
-        "controls": true,
-        "tracks": [
-          {
-            "name": "",
-            "id": "0",
-            "order": 0,
-            "trackEvents": []
-          }
-        ],
-        "clipData": {},
-        "currentTime": 0
-      }
-    ],
-    "targets": [
-      {
-        "id": "Target0",
-        "name": "video-container",
-        "element": "video-container"
-      }
-    ]
-  };
-
+// LINK
+const assembleLink = () => {
+  // const base = 'http://cibo.local:5757/PopcornEditor/editor.html?base=http://54.172.192.184/&initialMedia=';
+  const base = 'https://gridinoc.com/popcorn/popcorn-editor/PopcornEditor/editor.html?base=https://gridinoc.com/popcorn/&initialMedia=';
+  const segments = [];
 
   const $sections = $('.hyperaudio-sink article section');
 
-  let i = -1;
-  let start = 0;
-  let end = 0;
   for (const section of $sections) {
-    i++;
-    const src = $(section).data('src');
-    const from1 = $(section).data('start') / 1000;
-    const duration = $(section).data('end') / 1000;
+    const src = $(section).data('src').replace('https://s3.amazonaws.com/ingest.spintime.tv/', '');
+    let start = $(section).data('start') / 1000;
+    let end = $(section).data('end') / 1000;
 
-    end = start + duration;
+    // give trim space
+    if (start > 5) start = start - 5;
+    end = end + 5;
 
-    const trackEvent = {
-      "id": "TrackEvent" + i,
-      "type": "sequencer",
-      "popcornOptions": {
-        "source": [ src ],
-        "fallback": "",
-        "denied": false,
-        "start": start,
-        "end": end,
-        "type": "Archive",
-        "thumbnailSrc": "https://archive.org/download/electricsheep-flock-244-80000-6/electricsheep-flock-244-80000-6.thumbs/00244=80086=79910=77346_000001.jpg",
-        "from": from1,
-        "title": "Clip " + i,
-        "duration": duration,
-        "linkback": "https://s3.amazonaws.com/ingest.spintime.tv/",
-        "contentType": "",
-        "hidden": false,
-        "target": "video-container",
-        "width": 100,
-        "height": 100,
-        "top": 0,
-        "left": 0,
-        "volume": 100,
-        "mute": false,
-        "zindex": 1000,
-        "id": "TrackEvent" + i
-      },
-      "track": "0",
-      "name": "TrackEvent" + i
-    };
-
-    start = end;
-
-    edl.media[0].tracks[0].trackEvents.push(trackEvent);
-
-    const clip = {
-      "source": src,
-      "type": "Archive",
-      "title": "Clip " + i,
-      "thumbnail": "https://archive.org/download/electricsheep-flock-244-80000-6/electricsheep-flock-244-80000-6.thumbs/00244=80086=79910=77346_000001.jpg",
-      "linkback": "https://s3.amazonaws.com/ingest.spintime.tv/",
-      "duration": duration
-    };
-
-    edl.media[0].clipData[src] = clip;
+    // segments.push(encodeURIComponent(`${src}#/t=${start}/${end}`));
+    segments.push(encodeURIComponent(`${src}?start=${start}&end=${end}`));
   }
 
-  return edl;
+  return `${base}${segments.join(',')}`;
 };
+
+$('#popcorn').click(() => {
+  const link = assembleLink();
+  window.open(link);
+});
 
 // modals
 
@@ -684,4 +713,4 @@ window.debug = debug;
 window.$ = $;
 window.rangy = rangy;
 window.loadTranscript = loadTranscript;
-window.assembleEDL = assembleEDL;
+window.assembleLink = assembleLink;
